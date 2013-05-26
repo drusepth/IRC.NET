@@ -1,0 +1,5 @@
+C:\Users\Andrew\Documents\GitHub\IRC.NET\DIRC\bin\Debug\DIRC.dll
+C:\Users\Andrew\Documents\GitHub\IRC.NET\DIRC\bin\Debug\DIRC.pdb
+C:\Users\Andrew\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.csprojResolveAssemblyReference.cache
+C:\Users\Andrew\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.dll
+C:\Users\Andrew\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.pdb

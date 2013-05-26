@@ -44,18 +44,30 @@ namespace DIRC
         private string line; // incoming line
         private string[] splitLine; // array of line, expoded by \s
 
+        // Interfaces
+        public delegate void IRCLineHandler(string line);
+        List<IRCLineHandler> handlers;
+
         // Prepare a new connection to IRC
         public Connection(string nickIn, string serverIn, int portIn)
         {
             nickname = nickIn;
             server = serverIn;
             port = portIn;
+
+            handlers = new List<IRCLineHandler>();
         }
 
         // Add a channel to the list of channels to join
         public void AddChannel(string channel)
         {
             channels.Add(channel);
+        }
+
+        // Add a function to be called on every IRC line
+        public void AddLineHandler(IRCLineHandler function)
+        {
+            handlers.Add(function);
         }
 
         // Connect to the specified server and identify
@@ -68,6 +80,7 @@ namespace DIRC
 
             Identify(nickname);
 
+            enabled = true;
             Thread tIRC = new Thread(ircThread);
             tIRC.Start();
 
@@ -93,6 +106,12 @@ namespace DIRC
             {
                 if ((line = sread.ReadLine()) != null)
                 {
+                    // Call interface handlers first
+                    for (int i = 0; i < handlers.Count; i++)
+                    {
+                        handlers[i](line);
+                    }
+
                     splitLine = line.Split(' ');
 
                     if (splitLine.Length > 0)
@@ -131,28 +150,25 @@ namespace DIRC
         // Get the channel the last message came from
         public string GetChannel()
         {
-            return line.Split(' ')[2];
+            return ParseIRC.GetChannel(line);
         }
 
         // Get who said the last message
         public string GetUsernameSpeaking()
         {
-            return line.Split('!')[0].Split(':')[1];
+            return ParseIRC.GetUsernameSpeaking(line);
         }
 
         // Get the host of who said the last message
         public string GetHostSpeaking()
         {
-            return line.Split('!')[1].Split(' ')[0];
+            return ParseIRC.GetHostSpeaking(line);
         }
 
         // Get the message that was said last
         public string GetSpokenLine()
         {
-            if (line.Split(':').Length >= 2)
-                return line.Split(':')[2];
-
-            return "";
+            return ParseIRC.GetSpokenLine(line);
         }
 
         // Send a message to all joined channels
@@ -163,7 +179,20 @@ namespace DIRC
                 swrite.WriteLine("PRIVMSG {0} :{1}", channels[i], msg);
                 swrite.Flush();
             }
+        }
 
+        // Send a private message to a specific user
+        public void MessageUser(string user, string message)
+        {
+            swrite.WriteLine("NOTICE {0} :{1}", user, message);
+            swrite.Flush();
+        }
+
+        // Send a public message to a channel
+        public void MessageChannel(string channel, string message)
+        {
+            swrite.WriteLine("PRIVMSG {0} :{1}", channel, message);
+            swrite.Flush();
         }
     }
 }
