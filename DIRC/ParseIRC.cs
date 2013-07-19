@@ -32,5 +32,11 @@ namespace DIRC
             string[] splitLine = line.Split(' ');
             return (splitLine.Length > 0 && splitLine[1] == "PRIVMSG");
         }
+
+        public static bool IsPing(string line)
+        {
+            string[] splitLine = line.Split(' ');
+            return (splitLine.Length > 0 && splitLine[0] == "PING");
+        }
     }
 }

@@ -194,5 +194,93 @@ namespace DIRC
             swrite.WriteLine("PRIVMSG {0} :{1}", channel, message);
             swrite.Flush();
         }
+
+        // Get all channels a user is in
+        public List<string> UserChannels(string name)
+        {
+            // :i247.at.tddirc.net 307 testt clueless :is a registered nick
+            // :i247.at.tddirc.net 319 testt clueless :#thunked
+            // :i247.at.tddirc.net 312 testt clueless ddg.us.tddirc.net :TDDIRC US (DDG)
+            // :i247.at.tddirc.net 671 testt clueless :is using a Secure Connection
+            // :i247.at.tddirc.net 318 testt CLUELESS :End of /WHOIS list.
+            swrite.WriteLine("WHOIS {0}", name);
+            swrite.Flush();
+
+            List<string> channels = new List<string>();
+
+            string line;
+            while ((line = sread.ReadLine()) != null)
+            {
+                string[] splitLine = line.Split(' ');
+
+                if (splitLine[1] == "318")
+                {
+                    break;
+                }
+
+                if (splitLine[1] == "319")
+                {
+                    for (int i = 4; i < splitLine.Length; i++) {
+
+                        string sanitized_channel = splitLine[i]
+                            .Replace(':', ' ')
+                            .Replace('+', ' ')
+                            .Replace('%', ' ')
+                            .Replace('@', ' ')
+                            .Replace('&', ' ')
+                            .Replace('~', ' ')
+                            .Replace('#', ' ')
+                            .Trim();
+
+                        if (sanitized_channel.Length > 0 && !channels.Contains(sanitized_channel))
+                            channels.Add(sanitized_channel);
+                    }
+                }
+            }
+
+            return channels;
+        }
+
+        // Get all users in a channel
+        public List<string> UsersInChannel(string channel)
+        {
+            // :hub.irc.amazdong.com 353 boros = #dongs :boros @dru
+            // :hub.irc.amazdong.com 366 boros #dongs :End of /NAMES list.
+            swrite.WriteLine("NAMES {0}", channel);
+            swrite.Flush();
+
+            List<string> names = new List<string>();
+
+            string line;
+            while ((line = sread.ReadLine()) != null)
+            {
+                string[] splitLine = line.Split(' ');
+
+                if (splitLine[1] == "366")
+                    break;
+
+                if (splitLine[1] == "353")
+                {
+                    for (int i = 5; i < splitLine.Length; i++)
+                    {
+                        string sanitized_name = splitLine[i]
+                            .Replace(':', ' ')
+                            .Replace('+', ' ')
+                            .Replace('%', ' ')
+                            .Replace('@', ' ')
+                            .Replace('&', ' ')
+                            .Replace('~', ' ')
+                            .Trim();
+
+                        if (sanitized_name.Length > 0 && !names.Contains(sanitized_name))
+                        {
+                            names.Add(sanitized_name);
+                        }
+                    }
+                }
+            }
+
+            return names;
+        }
     }
 }
