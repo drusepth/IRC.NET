@@ -6,10 +6,15 @@ namespace DIRC
     {
         public static string GetSpokenLine(string line)
         {
-            if (line.Split(':').Length >= 2)
-                return line.Split(':')[2];
+            // :drusepth!drusepth@no-jk1.iiu.5u85no.IP PRIVMSG #test :this is a test
 
-            return "";
+            // Split off first :
+            line = line.Substring(1);
+
+            // Strip off everything before next :
+            line = line.Substring(line.IndexOf(':') + 1);
+
+            return line;
         }
 
         public static string GetHostSpeaking(string line)
