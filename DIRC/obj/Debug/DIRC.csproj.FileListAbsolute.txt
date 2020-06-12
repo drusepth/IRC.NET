@@ -7,3 +7,5 @@ C:\Users\drusepth\Documents\GitHub\IRC.NET\DIRC\bin\Debug\DIRC.dll
 C:\Users\drusepth\Documents\GitHub\IRC.NET\DIRC\bin\Debug\DIRC.pdb
 C:\Users\drusepth\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.dll
 C:\Users\drusepth\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.pdb
+C:\Users\drusepth\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.csprojAssemblyReference.cache
+C:\Users\drusepth\Documents\GitHub\IRC.NET\DIRC\obj\Debug\DIRC.csproj.CoreCompileInputs.cache
