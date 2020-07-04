@@ -1,19 +1,20 @@
 ﻿/*
  * DIRC, a .NET DLL for integrating IRC with applications
- * Latest release as of: 02/26/11
+ * Latest release as of: 07/04/2020
  * 
  * by Andrew Brown
  * http://www.drusepth.net/
  * 
  * Description:
  * 
- * Provides a 
+ * Provides an easy-to-use interface for applications to open IRC connections
+ * and manage a standard IRC presence.
  * 
  * Usage:
  * var bot = new DIRC.Connection(nickname, server, port);
  * bot.AddChannel(default_channel);
  * bot.Connect();
- * bot.SendGlobalMessage("Hello, world!");
+ * bot.SendGlobalMessage("Hello world!");
  * 
  */
 
@@ -22,131 +23,78 @@ using System.IO;
 using System.Threading;
 using System.Net.Sockets;
 using System.Collections.Generic;
+using DIRC.Models;
 
 namespace DIRC
 {
     public class Connection
     {
-        // Bot Information
-        private static string nickname;
-        private static string server;
-        private static int port;
-        private static List<string> channels = new List<string>();
-
-        // Socket Stuff
-        private StreamWriter swrite;
-        private StreamReader sread;
-        private NetworkStream sstream;
-        private TcpClient irc;
-        private bool enabled;
-
-        // Other information
-        private string line; // incoming line
-        private string[] splitLine; // array of line, expoded by \s
+        private readonly User user;
+        private readonly Network network;
 
         // Interfaces
         public delegate void IRCLineHandler(string line);
-        List<IRCLineHandler> handlers;
+
+        public Connection(string nickIn, Network networkIn)
+        {
+            user = new User(nickIn);
+            network = networkIn;
+        }
 
         // Prepare a new connection to IRC
         public Connection(string nickIn, string serverIn, int portIn)
         {
-            nickname = nickIn;
-            server = serverIn;
-            port = portIn;
-
-            handlers = new List<IRCLineHandler>();
+            user = new User(nickIn);
+            network = new Network(serverIn, portIn);
         }
 
         // Add a channel to the list of channels to join
         public void AddChannel(string channel)
         {
-            channels.Add(channel);
+            network.AddAutojoinChannel(new Channel(channel));
         }
 
         // Add a function to be called on every IRC line
         public void AddLineHandler(IRCLineHandler function)
         {
-            handlers.Add(function);
+            network.LineHandlers.Add(function);
         }
 
         // Connect to the specified server and identify
         public bool Connect()
         {
-            irc = new TcpClient(server, port);
-            sstream = irc.GetStream();
-            sread = new StreamReader(sstream);
-            swrite = new StreamWriter(sstream);
-
-            Identify(nickname);
-
-            enabled = true;
-            Thread tIRC = new Thread(ircThread);
-            tIRC.Start();
-
-            return true;
+            network.ConnectAs(user);
+            return network.Enabled;
         }
 
-        // Set user/nick on IRC
-        private bool Identify(string nick)
+        public bool Disconnect()
         {
-            swrite.WriteLine("USER {0} {0} {0} :{1}", nick, nick);
-            swrite.Flush();
-
-            swrite.WriteLine("NICK {0}", nick);
-            swrite.Flush();
-
-            return true;
+            network.Disconnect();
+            return network.Enabled;
         }
 
-        // Handle the IRC connection
-        private void ircThread()
+        // Send a message to all joined channels
+        public void SendGlobalMessage(string msg)
         {
-            while (enabled)
-            {
-                if ((line = sread.ReadLine()) != null)
-                {
-                    // Call interface handlers first
-                    for (int i = 0; i < handlers.Count; i++)
-                    {
-                        handlers[i](line);
-                    }
-
-                    splitLine = line.Split(' ');
-
-                    if (splitLine.Length > 0)
-                    {
-                        switch (splitLine[1])
-                        {
-                            case "366":
-                                break;
-
-                            case "376":
-                            case "422":
-                                for (int i = 0; i < channels.Count; i++)
-                                {
-                                    swrite.WriteLine("JOIN {0}", channels[i]);
-                                    swrite.Flush();
-                                }
-                                break;
-                        }
-
-                        if (splitLine[0] == "PING")
-                        {
-                            swrite.WriteLine("PONG {0}", splitLine[1]);
-                            swrite.Flush();
-                        }
-                    }
-                }
-            }
-
-            // Clean up
-            swrite.Close();
-            sread.Close();
-            irc.Close();
-
+            network.SendGlobalMessage(msg);
         }
 
+        // Send a private message to a specific user
+        public void SendUserMessage(string user, string message)
+        {
+            network.SendUserMessage(user, message);
+        }
+
+        // Send a public message to a channel
+        public void SendChannelMessage(string channel, string message)
+        {
+            network.SendChannelMessage(channel, message);
+        }
+
+        /*
+         * 
+         * TODO move these into ParseIRC if they aren't already there
+         * 
         // Get the channel the last message came from
         public string GetChannel()
         {
@@ -169,30 +117,6 @@ namespace DIRC
         public string GetSpokenLine()
         {
             return ParseIRC.GetSpokenLine(line);
-        }
-
-        // Send a message to all joined channels
-        public void SendGlobalMessage(string msg)
-        {
-            for (int i = 0; i < channels.Count; i++)
-            {
-                swrite.WriteLine("PRIVMSG {0} :{1}", channels[i], msg);
-                swrite.Flush();
-            }
-        }
-
-        // Send a private message to a specific user
-        public void MessageUser(string user, string message)
-        {
-            swrite.WriteLine("NOTICE {0} :{1}", user, message);
-            swrite.Flush();
-        }
-
-        // Send a public message to a channel
-        public void MessageChannel(string channel, string message)
-        {
-            swrite.WriteLine("PRIVMSG {0} :{1}", channel, message);
-            swrite.Flush();
         }
 
         // Get all channels a user is in
@@ -282,5 +206,6 @@ namespace DIRC
 
             return names;
         }
+        */
     }
 }

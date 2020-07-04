@@ -40,8 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Channel.cs" />
     <Compile Include="Connection.cs" />
-    <Compile Include="ParseIRC.cs" />
+    <Compile Include="Models\Network.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Services\ParseIRC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
