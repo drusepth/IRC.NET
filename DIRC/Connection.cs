@@ -35,6 +35,12 @@ namespace DIRC
         // Interfaces
         public delegate void IRCLineHandler(string line);
 
+        public Connection(User userIn, Network networkIn)
+        {
+            user = userIn;
+            network = networkIn;
+        }
+
         public Connection(string nickIn, Network networkIn)
         {
             user = new User(nickIn);
