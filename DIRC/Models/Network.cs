@@ -141,7 +141,7 @@ namespace DIRC.Models
         {
             for (int i = 0; i < ActiveChannels.Count; i++)
             {
-                swrite.WriteLine("PRIVMSG {0} :{1}", ActiveChannels[i], msg);
+                swrite.WriteLine("PRIVMSG {0} :{1}", ActiveChannels[i].Name, msg);
                 swrite.Flush();
             }
         }
