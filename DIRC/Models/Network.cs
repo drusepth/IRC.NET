@@ -115,7 +115,7 @@ namespace DIRC.Models
                             case "422":
                                 for (int i = 0; i < AutojoinChannels.Count; i++)
                                 {
-                                    swrite.WriteLine("JOIN {0}", AutojoinChannels[i]);
+                                    swrite.WriteLine("JOIN {0}", AutojoinChannels[i].Name);
                                     swrite.Flush();
 
                                     // TODO: It might be better to wait for the "you joined channel X" message to add to active channels
