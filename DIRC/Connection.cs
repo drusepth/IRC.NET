@@ -12,7 +12,7 @@
  * 
  * Usage:
  * var bot = new DIRC.Connection(nickname, server, port);
- * bot.AddChannel(default_channel);
+ * bot.AddAutojoinChannel(default_channel);
  * bot.Connect();
  * bot.SendGlobalMessage("Hello world!");
  * 
@@ -29,8 +29,8 @@ namespace DIRC
 {
     public class Connection
     {
-        private readonly User user;
-        private readonly Network network;
+        public readonly User user;
+        public readonly Network network;
 
         // Interfaces
         public delegate void IRCLineHandler(string line);
@@ -54,10 +54,15 @@ namespace DIRC
             network = new Network(serverIn, portIn);
         }
 
-        // Add a channel to the list of channels to join
-        public void AddChannel(string channel)
+        // Add a channel to the list of channels to join when we connect
+        public void AddAutojoinChannel(string channel)
         {
             network.AddAutojoinChannel(new Channel(channel));
+        }
+
+        public void JoinChannel(string channel)
+        {
+            network.JoinChannel(new Channel(channel));
         }
 
         // Add a function to be called on every IRC line

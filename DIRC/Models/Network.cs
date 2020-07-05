@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -57,7 +58,16 @@ namespace DIRC.Models
             AutojoinChannels.Add(channel);
             return AutojoinChannels;
         }
-        
+
+        public void JoinChannel(Channel channel)
+        {
+            swrite.WriteLine("JOIN {0}", channel.Name);
+            swrite.Flush();
+
+            // TODO: It might be better to wait for the "you joined channel X" message to add to active channels
+            ActiveChannels.Add(channel);
+        }
+
         public bool ConnectAs(User user)
         {
             irc = new TcpClient(Server, Port);
@@ -115,11 +125,7 @@ namespace DIRC.Models
                             case "422":
                                 for (int i = 0; i < AutojoinChannels.Count; i++)
                                 {
-                                    swrite.WriteLine("JOIN {0}", AutojoinChannels[i]);
-                                    swrite.Flush();
-
-                                    // TODO: It might be better to wait for the "you joined channel X" message to add to active channels
-                                    ActiveChannels.Add(AutojoinChannels[i]);
+                                    JoinChannel(AutojoinChannels[i]);
                                 }
                                 break;
                         }
@@ -141,7 +147,7 @@ namespace DIRC.Models
         {
             for (int i = 0; i < ActiveChannels.Count; i++)
             {
-                swrite.WriteLine("PRIVMSG {0} :{1}", ActiveChannels[i], msg);
+                swrite.WriteLine("PRIVMSG {0} :{1}", ActiveChannels[i].Name, msg);
                 swrite.Flush();
             }
         }
